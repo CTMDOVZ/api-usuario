@@ -5,7 +5,7 @@ provider:
   name: aws
   runtime: python3.12
   iam:
-    role: arn:aws:iam::498917627164:role/LabRole  # Utiliza el rol LabRole
+    role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
 
   environment:
     USERS_TABLE: ${self:custom.tables.users}
