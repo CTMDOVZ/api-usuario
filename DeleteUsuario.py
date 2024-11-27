@@ -1,8 +1,10 @@
 import boto3
 
 def delete_usuario(event, context):
-    # Obtener el ID del usuario
-    user_id = event['user_id']
+    body = json.loads(event.get('body', '{}'))  # Esto maneja el caso donde no haya un cuerpo válido
+        # Obtener el email y el password
+    user_id = body.get('user_id')
+
 
     # Conectar con DynamoDB
     dynamodb = boto3.resource('dynamodb')
