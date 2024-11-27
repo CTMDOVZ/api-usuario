@@ -1,0 +1,38 @@
+org: mateoespinoza
+service: api-usuario
+
+provider:
+  name: aws
+  runtime: python3.12
+  iam:
+    role: arn:aws:iam::498917627164:role/LabRole  # Utiliza el rol LabRole
+
+  environment:
+    USERS_TABLE: ${self:custom.tables.users}
+
+custom:
+  tables:
+    users: t_usuarios
+
+resources:
+  Resources:
+    UsuariosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.users}
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+functions:
+  usuarios:
+    handler: services.usuarios.handler.create_user
+    events:
+      - http:
+          path: /usuarios
+          method: post
+          cors: true
