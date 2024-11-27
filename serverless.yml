@@ -3,7 +3,7 @@ service: api-usuario
 
 provider:
   name: aws
-  runtime: python3.12
+  runtime: python3.10
   iam:
     role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
 
