@@ -54,7 +54,7 @@ functions:
           cors: true
 
   login_user:
-    handler: services.usuarios.handler.login_user
+    handler: LoginUsuario.lambda_handler
     events:
       - http:
           path: /usuarios/login
