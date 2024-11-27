@@ -30,7 +30,7 @@ resources:
 
 functions:
   create_user:
-    handler: lambda_function.lambda_handler
+    handler: services.usuarios.handler.create_user 
     events:
       - http:
           path: /usuarios
