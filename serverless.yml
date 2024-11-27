@@ -29,10 +29,42 @@ resources:
         BillingMode: PAY_PER_REQUEST
 
 functions:
-  usuarios:
+  create_user:
     handler: services.usuarios.handler.create_user
     events:
       - http:
           path: /usuarios
           method: post
+          cors: true
+
+  delete_user:
+    handler: services.usuarios.handler.delete_user
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: delete
+          cors: true
+
+  update_user:
+    handler: services.usuarios.handler.update_user
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: put
+          cors: true
+
+  login_user:
+    handler: services.usuarios.handler.login_user
+    events:
+      - http:
+          path: /usuarios/login
+          method: post
+          cors: true
+
+  search_user:
+    handler: services.usuarios.handler.search_user
+    events:
+      - http:
+          path: /usuarios/search
+          method: get
           cors: true
