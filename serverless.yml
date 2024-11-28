@@ -21,15 +21,19 @@ resources:
       Properties:
         TableName: ${self:custom.tables.usuarios}
         AttributeDefinitions:
+          - AttributeName: id_aerolinea
+            AttributeType: S  # Clave de partición
           - AttributeName: user_id
-            AttributeType: S  # Clave de partición será user_id (ID del usuario)
+            AttributeType: S  # Clave de ordenamiento
           - AttributeName: email
             AttributeType: S  # Usado para el GSI
           - AttributeName: created_at
             AttributeType: S  # Usado para el LSI (fecha de creación del usuario)
         KeySchema:
-          - AttributeName: user_id
+          - AttributeName: id_aerolinea
             KeyType: HASH  # Clave de partición
+          - AttributeName: user_id
+            KeyType: RANGE  # Clave de ordenamiento
         BillingMode: PAY_PER_REQUEST
 
         # Global Secondary Index (GSI) - Usado para consultar por email
@@ -45,12 +49,13 @@ resources:
         LocalSecondaryIndexes:
           - IndexName: CreatedAtIndex
             KeySchema:
-              - AttributeName: user_id
-                KeyType: HASH  # LSI por user_id
+              - AttributeName: id_aerolinea
+                KeyType: HASH  # LSI por id_aerolinea
               - AttributeName: created_at
                 KeyType: RANGE  # LSI por created_at (fecha de creación)
             Projection:
               ProjectionType: ALL
+
 
 functions:
   create_user:
@@ -91,4 +96,4 @@ functions:
       - http:
           path: /usuarios/search
           method: get
-          cors: true
+          cors: true
