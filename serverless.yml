@@ -8,25 +8,59 @@ provider:
     role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
 
   environment:
-    USERS_TABLE: ${self:custom.tables.users}
+    USUARIOS_TABLE: ${self:custom.tables.usuarios}  # Nombre de la tabla DynamoDB para usuarios
 
 custom:
   tables:
-    users: t_usuarios
+    usuarios: t_usuarios  # Nombre de la tabla DynamoDB para usuarios
 
 resources:
   Resources:
     UsuariosTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.tables.users}
+        TableName: ${self:custom.tables.usuarios}
         AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S  # La clave de partición será tenant_id (ID del inquilino)
           - AttributeName: user_id
-            AttributeType: S
+            AttributeType: S  # La clave de ordenamiento será user_id (ID del usuario)
+          - AttributeName: email
+            AttributeType: S  # Usado para el GSI
+          - AttributeName: created_at
+            AttributeType: S  # Usado para el LSI (fecha de creación del usuario)
         KeySchema:
+          - AttributeName: tenant_id
+            KeyType: HASH  # Clave de partición
           - AttributeName: user_id
-            KeyType: HASH
+            KeyType: RANGE  # Clave de ordenamiento
         BillingMode: PAY_PER_REQUEST
+
+        # Global Secondary Index (GSI) - Usado para consultar por email
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH  # GSI por email
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
+
+        # Local Secondary Index (LSI) - Usado para consultar por fecha de creación
+        LocalSecondaryIndexes:
+          - IndexName: CreatedAtIndex
+            KeySchema:
+              - AttributeName: tenant_id
+                KeyType: HASH  # LSI por tenant_id
+              - AttributeName: created_at
+                KeyType: RANGE  # LSI por created_at (fecha de creación)
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
 functions:
   create_user:
@@ -41,7 +75,7 @@ functions:
     handler: DeleteUsuario.lambda_handler
     events:
       - http:
-          path: /usuarios/{user_id}
+          path: /usuarios/{tenant_id}/{user_id}
           method: delete
           cors: true
 
@@ -49,7 +83,7 @@ functions:
     handler: UpdateUsuario.lambda_handler
     events:
       - http:
-          path: /usuarios/{user_id}
+          path: /usuarios/{tenant_id}/{user_id}
           method: put
           cors: true
 
@@ -68,3 +102,4 @@ functions:
           path: /usuarios/search
           method: get
           cors: true
+
