@@ -16,6 +16,7 @@ def lambda_handler(event, context):
         body = json.loads(event.get('body', '{}'))  # Esto maneja el caso donde no haya un cuerpo válido
         
         # Obtener los datos del usuario
+        id_aerolinea = body.get('id_aerolinea')
         user_id = body.get('user_id')
         email = body.get('email')
         password = body.get('password')
@@ -33,6 +34,7 @@ def lambda_handler(event, context):
         # Almacenar el usuario en DynamoDB
         t_usuarios.put_item(
             Item={
+                'id_aerolinea':id_aerolinea,
                 'user_id': user_id,
                 'email': email,
                 'password': hashed_password,
@@ -57,4 +59,4 @@ def lambda_handler(event, context):
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error', 'details': str(e)})
-        }
+        }
