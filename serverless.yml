@@ -96,4 +96,4 @@ functions:
       - http:
           path: /usuarios/search
           method: get
-          cors: true
+          cors: true
