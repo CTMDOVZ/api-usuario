@@ -22,7 +22,7 @@ resources:
         TableName: ${self:custom.tables.usuarios}
         AttributeDefinitions:
           - AttributeName: user_id
-            AttributeType: S  # La clave de partición será user_id
+            AttributeType: S  # Clave de partición será user_id (ID del usuario)
           - AttributeName: email
             AttributeType: S  # Usado para el GSI
           - AttributeName: created_at
@@ -30,8 +30,6 @@ resources:
         KeySchema:
           - AttributeName: user_id
             KeyType: HASH  # Clave de partición
-          - AttributeName: created_at  # Ahora se usa para la clave de ordenamiento (range key)
-            KeyType: RANGE  # Clave de ordenamiento para usar el LSI
         BillingMode: PAY_PER_REQUEST
 
         # Global Secondary Index (GSI) - Usado para consultar por email
