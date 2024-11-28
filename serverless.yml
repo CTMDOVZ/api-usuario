@@ -5,13 +5,14 @@ provider:
   name: aws
   runtime: python3.10
   iam:
-    role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN deeeeel rol LabRole
+    role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
+
   environment:
     USUARIOS_TABLE: ${self:custom.tables.usuarios}
 
 custom:
   tables:
-    usuarios: t_usuario  # Nombre de la tabla DynamoDB para usuarios
+    usuarios: t_usuarios  # Nombre de la tabla DynamoDB para usuarios
 
 resources:
   Resources:
@@ -21,7 +22,7 @@ resources:
         TableName: ${self:custom.tables.usuarios}
         AttributeDefinitions:
           - AttributeName: user_id
-            AttributeType: S  # La clave de ordenamiento será user_id
+            AttributeType: S  # La clave de partición será user_id
           - AttributeName: email
             AttributeType: S  # Usado para el GSI
           - AttributeName: created_at
@@ -29,6 +30,8 @@ resources:
         KeySchema:
           - AttributeName: user_id
             KeyType: HASH  # Clave de partición
+          - AttributeName: created_at  # Ahora se usa para la clave de ordenamiento (range key)
+            KeyType: RANGE  # Clave de ordenamiento para usar el LSI
         BillingMode: PAY_PER_REQUEST
 
         # Global Secondary Index (GSI) - Usado para consultar por email
