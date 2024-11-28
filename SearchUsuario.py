@@ -1,30 +1,36 @@
 import boto3
+import json
 
-def search_usuario(event, context):
-    body = json.loads(event.get('body', '{}'))  # Esto maneja el caso donde no haya un cuerpo válido
-        # Obtener el email y el password
-    user_id = body.get('user_id')
+def lambda_handler(event, context):
+    try:
+        body = json.loads(event.get('body', '{}'))  # Captura el cuerpo del evento
+        email = body.get('email')
 
+        if not email:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Email is required'})
+            }
 
-    # Conectar con DynamoDB
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('t_usuarios')
+        # Conectar DynamoDB
+        dynamodb = boto3.resource('dynamodb')
+        t_usuarios = dynamodb.Table('t_usuarios')
 
-    # Buscar el ítem
-    response = table.get_item(
-        Key={
-            'user_id': user_id
-        }
-    )
+        # Realizar la consulta utilizando el GSI por email
+        response = t_usuarios.query(
+            IndexName="EmailIndex",
+            KeyConditionExpression=boto3.dynamodb.conditions.Key('email').eq(email)
+        )
 
-    # Verificar si el ítem fue encontrado
-    if 'Item' in response:
+        # Retornar los usuarios encontrados
         return {
             'statusCode': 200,
-            'body': response['Item']
+            'body': json.dumps({'users': response['Items']})
         }
-    else:
+
+    except Exception as e:
+        print(f"Exception occurred: {str(e)}")
         return {
-            'statusCode': 404,
-            'body': f'Usuario con user_id={user_id} no encontrado.'
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error', 'details': str(e)})
         }
