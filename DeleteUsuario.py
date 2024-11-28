@@ -1,23 +1,31 @@
 import boto3
+import json
 
-def delete_usuario(event, context):
-    body = json.loads(event.get('body', '{}'))  # Esto maneja el caso donde no haya un cuerpo válido
-        # Obtener el email y el password
-    user_id = body.get('user_id')
+def lambda_handler(event, context):
+    try:
+        tenant_id = event['pathParameters']['tenant_id']
+        user_id = event['pathParameters']['user_id']
 
+        # Conectar a DynamoDB
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('t_usuarios')
 
-    # Conectar con DynamoDB
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('t_usuarios')
+        # Eliminar el usuario
+        table.delete_item(
+            Key={
+                'tenant_id': tenant_id,
+                'user_id': user_id
+            }
+        )
 
-    # Eliminar el ítem
-    response = table.delete_item(
-        Key={
-            'user_id': user_id
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'message': 'Usuario eliminado con éxito'})
         }
-    )
 
-    return {
-        'statusCode': 200,
-        'body': f'Usuario con user_id={user_id} eliminado correctamente.'
-    }
+    except Exception as e:
+        print(f"Exception: {str(e)}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error', 'details': str(e)})
+        }
