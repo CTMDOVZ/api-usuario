@@ -5,38 +5,39 @@ provider:
   name: aws
   runtime: python3.10
   iam:
-    role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
+    role: arn:aws:iam::399737753482:role/LabRole  # ARN del rol LabRole
 
   environment:
-    USUARIOS_TABLE: ${self:custom.tables.usuarios}
+    USUARIOS_TABLE: t_usuarios  # Nombre de la tabla DynamoDB para usuarios
 
 custom:
   tables:
-    usuarios: ${self:service}-${opt:stage, 'dev'}-usuarios  # Nombre dinámico para la tabla
+    usuarios: t_usuarios  # Nombre de la tabla DynamoDB para usuarios
 
 resources:
   Resources:
+    # Tabla de DynamoDB para usuarios
     UsuariosTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.tables.usuarios}  # Usamos el nombre dinámico
+        TableName: ${self:custom.tables.usuarios}
         AttributeDefinitions:
           - AttributeName: tenant_id
-            AttributeType: S  # La clave de partición será tenant_id (ID del inquilino)
+            AttributeType: S  # Clave de partición (tenant_id)
           - AttributeName: user_id
-            AttributeType: S  # La clave de ordenamiento será user_id (ID del usuario)
+            AttributeType: S  # Clave de ordenamiento (user_id)
           - AttributeName: email
-            AttributeType: S  # Usado para el GSI
+            AttributeType: S  # Atributo para GSI
           - AttributeName: created_at
-            AttributeType: S  # Usado para el LSI (fecha de creación del usuario)
+            AttributeType: S  # Atributo para LSI
         KeySchema:
           - AttributeName: tenant_id
             KeyType: HASH  # Clave de partición
           - AttributeName: user_id
             KeyType: RANGE  # Clave de ordenamiento
-        BillingMode: PAY_PER_REQUEST
+        BillingMode: PAY_PER_REQUEST  # Facturación por solicitud
 
-        # Global Secondary Index (GSI) - Usado para consultar por email
+        # Global Secondary Index (GSI) - Usado para consultas por email
         GlobalSecondaryIndexes:
           - IndexName: EmailIndex
             KeySchema:
@@ -44,8 +45,11 @@ resources:
                 KeyType: HASH  # GSI por email
             Projection:
               ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
-        # Local Secondary Index (LSI) - Usado para consultar por fecha de creación
+        # Local Secondary Index (LSI) - Usado para consultas por fecha de creación
         LocalSecondaryIndexes:
           - IndexName: CreatedAtIndex
             KeySchema:
@@ -55,8 +59,12 @@ resources:
                 KeyType: RANGE  # LSI por created_at (fecha de creación)
             Projection:
               ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
 
 functions:
+  # Función para crear un usuario
   create_user:
     handler: CrearUsuario.lambda_handler
     events:
@@ -65,6 +73,7 @@ functions:
           method: post
           cors: true
 
+  # Función para eliminar un usuario
   delete_user:
     handler: DeleteUsuario.lambda_handler
     events:
@@ -73,6 +82,7 @@ functions:
           method: delete
           cors: true
 
+  # Función para actualizar un usuario
   update_user:
     handler: UpdateUsuario.lambda_handler
     events:
@@ -81,6 +91,7 @@ functions:
           method: put
           cors: true
 
+  # Función para login de un usuario
   login_user:
     handler: LoginUsuario.lambda_handler
     events:
@@ -89,6 +100,7 @@ functions:
           method: post
           cors: true
 
+  # Función para buscar un usuario
   search_user:
     handler: SearchUsuario.lambda_handler
     events:
