@@ -1,30 +1,28 @@
 import boto3
+import json
 
-def search_usuario(event, context):
-    body = json.loads(event.get('body', '{}'))  # Esto maneja el caso donde no haya un cuerpo válido
-        # Obtener el email y el password
-    user_id = body.get('user_id')
+def lambda_handler(event, context):
+    try:
+        tenant_id = event['pathParameters']['tenant_id']
 
+        # Conectar a DynamoDB
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('t_usuarios')
 
-    # Conectar con DynamoDB
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('t_usuarios')
+        # Obtener todos los usuarios del tenant
+        response = table.query(
+            KeyConditionExpression="tenant_id = :tenant_id",
+            ExpressionAttributeValues={':tenant_id': tenant_id}
+        )
 
-    # Buscar el ítem
-    response = table.get_item(
-        Key={
-            'user_id': user_id
-        }
-    )
-
-    # Verificar si el ítem fue encontrado
-    if 'Item' in response:
         return {
             'statusCode': 200,
-            'body': response['Item']
+            'body': json.dumps({'usuarios': response['Items']})
         }
-    else:
+
+    except Exception as e:
+        print(f"Exception: {str(e)}")
         return {
-            'statusCode': 404,
-            'body': f'Usuario con user_id={user_id} no encontrado.'
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error', 'details': str(e)})
         }
