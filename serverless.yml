@@ -8,18 +8,18 @@ provider:
     role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
 
   environment:
-    USUARIOS_TABLE: ${self:custom.tables.usuarios}  # Nombre de la tabla DynamoDB para usuarios
+    USUARIOS_TABLE: ${self:custom.tables.usuarios}
 
 custom:
   tables:
-    usuarios: t_usuarios  # Nombre de la tabla DynamoDB para usuarios
+    usuarios: ${self:service}-${opt:stage, 'dev'}-usuarios  # Nombre dinámico para la tabla
 
 resources:
   Resources:
     UsuariosTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.tables.usuarios}
+        TableName: ${self:custom.tables.usuarios}  # Usamos el nombre dinámico
         AttributeDefinitions:
           - AttributeName: tenant_id
             AttributeType: S  # La clave de partición será tenant_id (ID del inquilino)
@@ -34,7 +34,7 @@ resources:
             KeyType: HASH  # Clave de partición
           - AttributeName: user_id
             KeyType: RANGE  # Clave de ordenamiento
-        BillingMode: PAY_PER_REQUEST  # Uso del modo de facturación por solicitud
+        BillingMode: PAY_PER_REQUEST
 
         # Global Secondary Index (GSI) - Usado para consultar por email
         GlobalSecondaryIndexes:
@@ -58,3 +58,47 @@ resources:
                 KeyType: RANGE  # LSI por created_at (fecha de creación)
             Projection:
               ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
+
+functions:
+  create_user:
+    handler: CrearUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios
+          method: post
+          cors: true
+
+  delete_user:
+    handler: DeleteUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: delete
+          cors: true
+
+  update_user:
+    handler: UpdateUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: put
+          cors: true
+
+  login_user:
+    handler: LoginUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/login
+          method: post
+          cors: true
+
+  search_user:
+    handler: SearchUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/search
+          method: get
+          cors: true
