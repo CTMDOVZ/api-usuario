@@ -3,7 +3,7 @@ import boto3
 def update_usuario(event, context):
     # Obtener el ID del usuario y los atributos a actualizar
     user_id = event['user_id']
-    atributos_actualizar = event['atributos']  # Diccionario con los atributos y valores a actualizar
+    atributos_actualizar = event['atributos']  # Diccionario con los atributos y valorefdfds a actualizar
 
     # Conectar con DynamoDB
     dynamodb = boto3.resource('dynamodb')
