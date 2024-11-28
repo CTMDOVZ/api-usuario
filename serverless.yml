@@ -44,9 +44,6 @@ resources:
                 KeyType: HASH  # GSI por email
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
 
         # Local Secondary Index (LSI) - Usado para consultar por fecha de creación
         LocalSecondaryIndexes:
@@ -58,9 +55,6 @@ resources:
                 KeyType: RANGE  # LSI por created_at (fecha de creación)
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
 
 functions:
   create_user:
