@@ -44,9 +44,6 @@ resources:
                 KeyType: HASH  # GSI por email
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
 
         # Local Secondary Index (LSI) - Usado para consultar por fecha de creación
         LocalSecondaryIndexes:
@@ -58,47 +55,3 @@ resources:
                 KeyType: RANGE  # LSI por created_at (fecha de creación)
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 5
-              WriteCapacityUnits: 5
-
-functions:
-  create_user:
-    handler: CrearUsuario.lambda_handler
-    events:
-      - http:
-          path: /usuarios
-          method: post
-          cors: true
-
-  delete_user:
-    handler: DeleteUsuario.lambda_handler
-    events:
-      - http:
-          path: /usuarios/{tenant_id}/{user_id}
-          method: delete
-          cors: true
-
-  update_user:
-    handler: UpdateUsuario.lambda_handler
-    events:
-      - http:
-          path: /usuarios/{tenant_id}/{user_id}
-          method: put
-          cors: true
-
-  login_user:
-    handler: LoginUsuario.lambda_handler
-    events:
-      - http:
-          path: /usuarios/login
-          method: post
-          cors: true
-
-  search_user:
-    handler: SearchUsuario.lambda_handler
-    events:
-      - http:
-          path: /usuarios/search
-          method: get
-          cors: true
