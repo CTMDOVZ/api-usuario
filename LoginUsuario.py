@@ -11,7 +11,7 @@ def hash_password(password):
         return hashlib.sha256(password.encode()).hexdigest()
     except Exception as e:
         print(f"Error hashing password: {str(e)}")
-        raise  # Lanza el error para que sea capturado en el bloque ddddde manejo de errores principal
+        raise  # Lanza el error para que sea capturado en el bloque ddddde manejoddddddddddddddd de errores principal
 
 def lambda_handler(event, context):
     try:
