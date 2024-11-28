@@ -55,3 +55,44 @@ resources:
                 KeyType: RANGE  # LSI por created_at (fecha de creación)
             Projection:
               ProjectionType: ALL
+
+functions:
+  create_user:
+    handler: CrearUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios
+          method: post
+          cors: true
+
+  delete_user:
+    handler: DeleteUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: delete
+          cors: true
+
+  update_user:
+    handler: UpdateUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: put
+          cors: true
+
+  login_user:
+    handler: LoginUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/login
+          method: post
+          cors: true
+
+  search_user:
+    handler: SearchUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/search
+          method: get
+          cors: true
