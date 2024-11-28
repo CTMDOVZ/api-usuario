@@ -11,7 +11,7 @@ provider:
 
 custom:
   tables:
-    usuarios: t_usuarios  # Nombre de la tabla DynamoDB para usuarios
+    usuarios: t_usuario  # Nombre de la tabla DynamoDB para usuarios
 
 resources:
   Resources:
