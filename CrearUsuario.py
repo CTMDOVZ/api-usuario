@@ -4,7 +4,7 @@ import json
 
 # Hashear contraseña
 def hash_password(password):
-    # Retorna la contraseña hasheada
+    # Retorna la contraseña hasheadadfdfdf
     try:
         return hashlib.sha256(password.encode()).hexdigest()
     except Exception as e:
