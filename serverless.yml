@@ -1,0 +1,70 @@
+org: mateoespinoza
+service: api-usuario
+
+provider:
+  name: aws
+  runtime: python3.10
+  iam:
+    role: arn:aws:iam::399737753482:role/LabRole  # Aquí se asigna el ARN del rol LabRole
+
+  environment:
+    USERS_TABLE: ${self:custom.tables.users}
+
+custom:
+  tables:
+    users: t_usuarios
+
+resources:
+  Resources:
+    UsuariosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tables.users}
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+functions:
+  create_user:
+    handler: CrearUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios
+          method: post
+          cors: true
+
+  delete_user:
+    handler: DeleteUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: delete
+          cors: true
+
+  update_user:
+    handler: UpdateUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/{user_id}
+          method: put
+          cors: true
+
+  login_user:
+    handler: LoginUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/login
+          method: post
+          cors: true
+
+  search_user:
+    handler: SearchUsuario.lambda_handler
+    events:
+      - http:
+          path: /usuarios/search
+          method: get
+          cors: true
